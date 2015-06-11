@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="1.7" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/IOIOBridge" />
+            <option value="$PROJECT_DIR$/IOIODude" />
+            <option value="$PROJECT_DIR$/IOIOLibAndroid" />
+            <option value="$PROJECT_DIR$/IOIOLibAndroidAccessory" />
+            <option value="$PROJECT_DIR$/IOIOLibAndroidBluetooth" />
+            <option value="$PROJECT_DIR$/IOIOLibAndroidDevice" />
+            <option value="$PROJECT_DIR$/IOIOLibCore" />
+            <option value="$PROJECT_DIR$/IOIOLibPC" />
+            <option value="$PROJECT_DIR$/applications/HelloIOIO" />
+            <option value="$PROJECT_DIR$/applications/HelloIOIOService" />
+            <option value="$PROJECT_DIR$/applications/HolidayIOIO" />
+            <option value="$PROJECT_DIR$/applications/IOIOConnectionTester" />
+            <option value="$PROJECT_DIR$/applications/IOIOConnectionTesterAndroid" />
+            <option value="$PROJECT_DIR$/applications/IOIOSimpleApp" />
+            <option value="$PROJECT_DIR$/applications/IOIOTestBed" />
+            <option value="$PROJECT_DIR$/applications/IOIOTortureTest" />
+            <option value="$PROJECT_DIR$/applications/ShoeBot" />
+            <option value="$PROJECT_DIR$/applications/pc/HelloIOIOConsole" />
+            <option value="$PROJECT_DIR$/applications/pc/HelloIOIOSwing" />
+            <option value="$PROJECT_DIR$/applications/pc/HelloSequencer" />
+            <option value="$PROJECT_DIR$/applications/pc/IOIOConnectionTesterPC" />
+            <option value="$PROJECT_DIR$/applications/pc/IOIOServoSwing" />
+            <option value="$PROJECT_DIR$/applications/pc/SeeedTestbed" />
+            <option value="$PROJECT_DIR$/openCVLibrary300" />
+            <option value="$PROJECT_DIR$/openCVSamplecolorblobdetection" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

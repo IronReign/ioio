@@ -1,5 +1,5 @@
 // Core library.
-include 'IOIOLibCore'
+include 'IOIOLibCore', ':HelloIOIO', ':IOIOSimpleApp', ':HolidayIOIO'
 
 // PC library.
 include 'IOIOLibPC'
@@ -21,7 +21,12 @@ include 'IOIODude', 'IOIOBridge'
 
 // Android applications.
 include 'applications/HelloIOIO', 'applications/HelloIOIOService', 'applications/HolidayIOIO',
-        'applications/IOIOManager', 'applications/IOIOSimpleApp', 'applications/IOIOTestBed',
+        'applications/IOIOSimpleApp', 'applications/IOIOTestBed',
         'applications/IOIOTortureTest', 'applications/ShoeBot',
         'applications/IOIOConnectionTesterAndroid'
 
+project(':HelloIOIO').projectDir = new File('applications/HelloIOIO')
+project(':IOIOSimpleApp').projectDir = new File('applications/IOIOSimpleApp')
+project(':HolidayIOIO').projectDir = new File('applications/HolidayIOIO')
+include ':openCVLibrary300'
+include ':openCVSamplecolorblobdetection'

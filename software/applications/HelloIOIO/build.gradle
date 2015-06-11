@@ -20,4 +20,5 @@ dependencies {
   compile 'ioio:IOIOLibAndroidBluetooth:5.05'
   compile 'ioio:IOIOLibAndroidAccessory:5.05'
   compile 'ioio:IOIOLibAndroidDevice:5.05'
+  compile project(':openCVLibrary300')
 }

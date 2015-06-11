@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/applications/HelloIOIO/HelloIOIO.iml" filepath="$PROJECT_DIR$/applications/HelloIOIO/HelloIOIO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/HolidayIOIO/HolidayIOIO.iml" filepath="$PROJECT_DIR$/applications/HolidayIOIO/HolidayIOIO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOBridge/IOIOBridge.iml" filepath="$PROJECT_DIR$/IOIOBridge/IOIOBridge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIODude/IOIODude.iml" filepath="$PROJECT_DIR$/IOIODude/IOIODude.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibAndroid/IOIOLibAndroid.iml" filepath="$PROJECT_DIR$/IOIOLibAndroid/IOIOLibAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibAndroidAccessory/IOIOLibAndroidAccessory.iml" filepath="$PROJECT_DIR$/IOIOLibAndroidAccessory/IOIOLibAndroidAccessory.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibAndroidBluetooth/IOIOLibAndroidBluetooth.iml" filepath="$PROJECT_DIR$/IOIOLibAndroidBluetooth/IOIOLibAndroidBluetooth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibAndroidDevice/IOIOLibAndroidDevice.iml" filepath="$PROJECT_DIR$/IOIOLibAndroidDevice/IOIOLibAndroidDevice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibCore/IOIOLibCore.iml" filepath="$PROJECT_DIR$/IOIOLibCore/IOIOLibCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IOIOLibPC/IOIOLibPC.iml" filepath="$PROJECT_DIR$/IOIOLibPC/IOIOLibPC.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOSimpleApp/IOIOSimpleApp.iml" filepath="$PROJECT_DIR$/applications/IOIOSimpleApp/IOIOSimpleApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/HelloIOIO/applications_HelloIOIO.iml" filepath="$PROJECT_DIR$/applications/HelloIOIO/applications_HelloIOIO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/HelloIOIOService/applications_HelloIOIOService.iml" filepath="$PROJECT_DIR$/applications/HelloIOIOService/applications_HelloIOIOService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/HolidayIOIO/applications_HolidayIOIO.iml" filepath="$PROJECT_DIR$/applications/HolidayIOIO/applications_HolidayIOIO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOConnectionTester/applications_IOIOConnectionTester.iml" filepath="$PROJECT_DIR$/applications/IOIOConnectionTester/applications_IOIOConnectionTester.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOConnectionTesterAndroid/applications_IOIOConnectionTesterAndroid.iml" filepath="$PROJECT_DIR$/applications/IOIOConnectionTesterAndroid/applications_IOIOConnectionTesterAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOSimpleApp/applications_IOIOSimpleApp.iml" filepath="$PROJECT_DIR$/applications/IOIOSimpleApp/applications_IOIOSimpleApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOTestBed/applications_IOIOTestBed.iml" filepath="$PROJECT_DIR$/applications/IOIOTestBed/applications_IOIOTestBed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/IOIOTortureTest/applications_IOIOTortureTest.iml" filepath="$PROJECT_DIR$/applications/IOIOTortureTest/applications_IOIOTortureTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/ShoeBot/applications_ShoeBot.iml" filepath="$PROJECT_DIR$/applications/ShoeBot/applications_ShoeBot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/HelloIOIOConsole/applications_pc_HelloIOIOConsole.iml" filepath="$PROJECT_DIR$/applications/pc/HelloIOIOConsole/applications_pc_HelloIOIOConsole.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/HelloIOIOSwing/applications_pc_HelloIOIOSwing.iml" filepath="$PROJECT_DIR$/applications/pc/HelloIOIOSwing/applications_pc_HelloIOIOSwing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/HelloSequencer/applications_pc_HelloSequencer.iml" filepath="$PROJECT_DIR$/applications/pc/HelloSequencer/applications_pc_HelloSequencer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/IOIOConnectionTesterPC/applications_pc_IOIOConnectionTesterPC.iml" filepath="$PROJECT_DIR$/applications/pc/IOIOConnectionTesterPC/applications_pc_IOIOConnectionTesterPC.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/IOIOServoSwing/applications_pc_IOIOServoSwing.iml" filepath="$PROJECT_DIR$/applications/pc/IOIOServoSwing/applications_pc_IOIOServoSwing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/pc/SeeedTestbed/applications_pc_SeeedTestbed.iml" filepath="$PROJECT_DIR$/applications/pc/SeeedTestbed/applications_pc_SeeedTestbed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVLibrary300/openCVLibrary300.iml" filepath="$PROJECT_DIR$/openCVLibrary300/openCVLibrary300.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVSamplecolorblobdetection/openCVSamplecolorblobdetection.iml" filepath="$PROJECT_DIR$/openCVSamplecolorblobdetection/openCVSamplecolorblobdetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/software.iml" filepath="$PROJECT_DIR$/software.iml" />
+    </modules>
+  </component>
+</project>
