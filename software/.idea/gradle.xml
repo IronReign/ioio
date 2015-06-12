@@ -34,6 +34,8 @@
             <option value="$PROJECT_DIR$/applications/pc/SeeedTestbed" />
             <option value="$PROJECT_DIR$/openCVLibrary300" />
             <option value="$PROJECT_DIR$/openCVSamplecolorblobdetection" />
+            <option value="$PROJECT_DIR$/openCVSamplefacedetection" />
+            <option value="$PROJECT_DIR$/openCVTutorial3CameraControl" />
           </set>
         </option>
       </GradleProjectSettings>

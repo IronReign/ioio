@@ -30,3 +30,5 @@ project(':IOIOSimpleApp').projectDir = new File('applications/IOIOSimpleApp')
 project(':HolidayIOIO').projectDir = new File('applications/HolidayIOIO')
 include ':openCVLibrary300'
 include ':openCVSamplecolorblobdetection'
+include ':openCVTutorial3CameraControl'
+include ':openCVSamplefacedetection'

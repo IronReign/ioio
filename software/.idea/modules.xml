@@ -30,6 +30,8 @@
       <module fileurl="file://$PROJECT_DIR$/applications/pc/SeeedTestbed/applications_pc_SeeedTestbed.iml" filepath="$PROJECT_DIR$/applications/pc/SeeedTestbed/applications_pc_SeeedTestbed.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVLibrary300/openCVLibrary300.iml" filepath="$PROJECT_DIR$/openCVLibrary300/openCVLibrary300.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCVSamplecolorblobdetection/openCVSamplecolorblobdetection.iml" filepath="$PROJECT_DIR$/openCVSamplecolorblobdetection/openCVSamplecolorblobdetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVSamplefacedetection/openCVSamplefacedetection.iml" filepath="$PROJECT_DIR$/openCVSamplefacedetection/openCVSamplefacedetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVTutorial3CameraControl/openCVTutorial3CameraControl.iml" filepath="$PROJECT_DIR$/openCVTutorial3CameraControl/openCVTutorial3CameraControl.iml" />
       <module fileurl="file://$PROJECT_DIR$/software.iml" filepath="$PROJECT_DIR$/software.iml" />
     </modules>
   </component>
