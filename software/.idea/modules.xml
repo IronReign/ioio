@@ -13,6 +13,7 @@
       <module fileurl="file://$PROJECT_DIR$/IOIOLibCore/IOIOLibCore.iml" filepath="$PROJECT_DIR$/IOIOLibCore/IOIOLibCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/IOIOLibPC/IOIOLibPC.iml" filepath="$PROJECT_DIR$/IOIOLibPC/IOIOLibPC.iml" />
       <module fileurl="file://$PROJECT_DIR$/applications/IOIOSimpleApp/IOIOSimpleApp.iml" filepath="$PROJECT_DIR$/applications/IOIOSimpleApp/IOIOSimpleApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/applications/ShoeBot/ShoeBot.iml" filepath="$PROJECT_DIR$/applications/ShoeBot/ShoeBot.iml" />
       <module fileurl="file://$PROJECT_DIR$/applications/HelloIOIO/applications_HelloIOIO.iml" filepath="$PROJECT_DIR$/applications/HelloIOIO/applications_HelloIOIO.iml" />
       <module fileurl="file://$PROJECT_DIR$/applications/HelloIOIOService/applications_HelloIOIOService.iml" filepath="$PROJECT_DIR$/applications/HelloIOIOService/applications_HelloIOIOService.iml" />
       <module fileurl="file://$PROJECT_DIR$/applications/HolidayIOIO/applications_HolidayIOIO.iml" filepath="$PROJECT_DIR$/applications/HolidayIOIO/applications_HolidayIOIO.iml" />

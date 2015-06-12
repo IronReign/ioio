@@ -1,5 +1,5 @@
 // Core library.
-include 'IOIOLibCore', ':HelloIOIO', ':IOIOSimpleApp', ':HolidayIOIO'
+include 'IOIOLibCore', ':HelloIOIO', ':IOIOSimpleApp', ':HolidayIOIO', ':ShoeBot'
 
 // PC library.
 include 'IOIOLibPC'
@@ -32,3 +32,4 @@ include ':openCVLibrary300'
 include ':openCVSamplecolorblobdetection'
 include ':openCVTutorial3CameraControl'
 include ':openCVSamplefacedetection'
+project(':ShoeBot').projectDir = new File('applications/ShoeBot')
