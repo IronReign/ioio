@@ -33,3 +33,4 @@ include ':openCVSamplecolorblobdetection'
 include ':openCVTutorial3CameraControl'
 include ':openCVSamplefacedetection'
 project(':ShoeBot').projectDir = new File('applications/ShoeBot')
+include ':openCVLibrary2411'

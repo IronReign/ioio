@@ -1,5 +1,6 @@
 package org.opencv.samples.colorblobdetect;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -10,12 +11,14 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -29,6 +32,7 @@ import android.view.View.OnTouchListener;
 public class ColorBlobDetectionActivity extends Activity implements OnTouchListener, CvCameraViewListener2 {
     private static final String  TAG              = "OCVSample::Activity";
 
+//    private CameraControl mOpenCvCameraView;
     private boolean              mIsColorSelected = false;
     private Mat                  mRgba;
     private Scalar               mBlobColorRgba;
@@ -57,6 +61,9 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
             }
         }
     };
+
+
+
 
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
@@ -90,7 +97,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_11, this, mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -110,7 +117,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         mBlobColorRgba = new Scalar(255);
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
-        CONTOUR_COLOR = new Scalar(255,0,0,255);
+        CONTOUR_COLOR = new Scalar(0,255,0,255);
     }
 
     public void onCameraViewStopped() {
@@ -174,8 +181,17 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
             mDetector.process(mRgba);
             List<MatOfPoint> contours = mDetector.getContours();
             Log.e(TAG, "Contours count: " + contours.size());
-            Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
+            Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR, 3);
 
+            List<Moments> mu = new ArrayList<Moments>(contours.size());
+            for (int i = 0; i < contours.size(); i++) {
+                mu.add(i, Imgproc.moments(contours.get(i), false));
+                Moments p = mu.get(i);
+                int x = (int) (p.get_m10() / p.get_m00());
+                int y = (int) (p.get_m01() / p.get_m00());
+                //Core.circle(mRgba, new Point(x, y), 4, new Scalar(255,49,0,255));
+                Core.circle(mRgba, new Point(x, y), 5, CONTOUR_COLOR, -1);
+            }
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(mBlobColorRgba);
 
