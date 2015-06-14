@@ -29,4 +29,8 @@ android {
 
 dependencies {
     compile project(':openCVLibrary2411')
+    compile project(':IOIOLibAndroid')
+    compile project(':IOIOLibAndroidAccessory')
+    compile project(':IOIOLibAndroidBluetooth')
+    compile project(':IOIOLibAndroidDevice')
 }

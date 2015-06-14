@@ -86,6 +86,11 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 15 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="IOIOLibAndroidBluetooth" exported="" />
+    <orderEntry type="module" module-name="IOIOLibAndroidAccessory" exported="" />
+    <orderEntry type="module" module-name="IOIOLibAndroid" exported="" />
+    <orderEntry type="module" module-name="IOIOLibCore" exported="" />
     <orderEntry type="module" module-name="openCVLibrary2411" exported="" />
+    <orderEntry type="module" module-name="IOIOLibAndroidDevice" exported="" />
   </component>
 </module>
