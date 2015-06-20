@@ -20,7 +20,6 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -46,6 +45,12 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     private TextView textView_;
     private SeekBar seekBar_;
     private ToggleButton toggleButton_;
+    static private int screenWidth;
+    static private int screenHeight;
+    static private int blobx;
+    static private int bloby;
+    static private double maxContour = 0;
+    static private double minContour = 1000;
 
 //    private CameraControl mOpenCvCameraView;
     private boolean              mIsColorSelected = false;
@@ -104,6 +109,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         toggleButton_ = (ToggleButton) findViewById(R.id.ToggleButton);
 
         enableUi(false);
+
     }
 
     @Override
@@ -141,6 +147,8 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
         CONTOUR_COLOR = new Scalar(0,255,0,255);
+        screenHeight=height;
+        screenWidth=width;
     }
 
     public void onCameraViewStopped() {
@@ -206,7 +214,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             Log.e(TAG, "Contours count: " + contours.size());
             Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR, 3);
 
+            //get the centroid (center of mass) and area for each contour
+
             List<Moments> mu = new ArrayList<Moments>(contours.size());
+            maxContour=0;
             for (int i = 0; i < contours.size(); i++) {
                 mu.add(i, Imgproc.moments(contours.get(i), false));
                 Moments p = mu.get(i);
@@ -214,7 +225,16 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 int y = (int) (p.get_m01() / p.get_m00());
                 //Core.circle(mRgba, new Point(x, y), 4, new Scalar(255,49,0,255));
                 Core.circle(mRgba, new Point(x, y), 5, CONTOUR_COLOR, -1);
+                double area = Imgproc.contourArea(contours.get(i));
+                if (area > maxContour)
+                {
+                    maxContour=area;
+                    blobx=x;
+                    bloby=y;
+                }
             }
+
+
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(mBlobColorRgba);
 
@@ -250,21 +270,33 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
 
         class Looper extends BaseIOIOLooper {
             private AnalogInput input_;
-            private PwmOutput pwmOutput_;
+            private PwmOutput pwmCameraPan_;
+            private PwmOutput pwmCameraTilt;
+            private PwmOutput pwmSteer;
+            private PwmOutput pwmSpeed;
             private DigitalOutput led_;
 
             @Override
             public void setup() throws ConnectionLostException {
                 led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
                 input_ = ioio_.openAnalogInput(40);
-                pwmOutput_ = ioio_.openPwmOutput(12, 100);
+                pwmSteer = ioio_.openPwmOutput(10, 100);
+                pwmSpeed = ioio_.openPwmOutput(11,100);
+                pwmCameraPan_ = ioio_.openPwmOutput(12, 100);
+                pwmCameraTilt= ioio_.openPwmOutput(13, 100);
                 enableUi(true);
             }
 
             @Override
             public void loop() throws ConnectionLostException, InterruptedException {
                 setNumber(input_.read());
-                pwmOutput_.setPulseWidth(500 + seekBar_.getProgress() * 2);
+                pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
+                if (maxContour >= minContour) //follow the largest countour that meets minimum size requirement
+                {
+                    pwmSteer.setPulseWidth((int) (((((float) blobx / (float) screenWidth * 1000) + 1000)-1500)*-1)+1500); // steering needs to be inverted around 1500
+                    pwmCameraPan_.setPulseWidth((int) ((float) blobx / (float) screenWidth * 1000 / 6) + 1460); //range reduced for winch servo
+                }
+
                 led_.write(!toggleButton_.isChecked());
                 Thread.sleep(10);
             }
