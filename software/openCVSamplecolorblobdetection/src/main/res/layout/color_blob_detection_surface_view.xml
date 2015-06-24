@@ -1,13 +1,15 @@
 <FrameLayout
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:opencv="http://schemas.android.com/apk/res-auto">
 
 
     <org.opencv.android.JavaCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/color_blob_detection_activity_surface_view"/>
+        android:id="@+id/color_blob_detection_activity_surface_view"
+        opencv:camera_id="front" />
 
 
     <TextView

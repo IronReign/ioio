@@ -290,11 +290,25 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             @Override
             public void loop() throws ConnectionLostException, InterruptedException {
                 setNumber(input_.read());
-                pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
+                //pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
                 if (maxContour >= minContour) //follow the largest countour that meets minimum size requirement
                 {
-                    pwmSteer.setPulseWidth((int) (((((float) blobx / (float) screenWidth * 1000) + 1000)-1500)*-1)+1500); // steering needs to be inverted around 1500
-                    pwmCameraPan_.setPulseWidth((int) ((float) blobx / (float) screenWidth * 1000 / 6) + 1460); //range reduced for winch servo
+                    double offset;
+                    // convert to % offset from center.  So center = 50% + 0%, mid left = 50% + -25% = 25%
+                    // then convert to servo range of 1000 to 2000 centered on 1500
+                    // then scale by the appropriate multiplier for the desired responsiveness
+                    // then clip to legal servo range
+                    // horizontal
+                    offset = -((screenWidth/2)-blobx); //absolute offset from center
+                    offset = offset/screenWidth; //relative offset
+                    pwmSteer.setPulseWidth((int)(offset * 1000) * -3 + 1500);
+                    pwmCameraPan_.setPulseWidth((int)(offset * 1000 * .15) + 1540);  //center for the pan winch servo is currently off a bit - also reduce its reactivity a whole bunch since it is a 3.5 turn winch server
+                    //vertical
+                    offset = -((screenHeight/2)-bloby); //absolute offset from center
+                    offset = offset/screenHeight; //relative offset
+                    //pwmSteer.setPulseWidth((int) (((((float) blobx * 3 / (float) screenWidth * 1000) + 1000)-1500)*-1)+1500); // steering needs to be inverted around 1500
+                    //pwmCameraPan_.setPulseWidth((int) ((float) blobx / (float) screenWidth * 1000 / 6) + 1460); //range reduced for winch servo
+                    pwmCameraTilt.setPulseWidth((int)(offset * 1000 * 1) + 1500);
                 }
 
                 led_.write(!toggleButton_.isChecked());
