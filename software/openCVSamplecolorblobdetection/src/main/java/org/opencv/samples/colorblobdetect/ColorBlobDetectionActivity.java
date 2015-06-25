@@ -34,6 +34,7 @@ import android.widget.ToggleButton;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
+import ioio.lib.api.PulseInput;
 import ioio.lib.api.PwmOutput;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
@@ -274,6 +275,8 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             private PwmOutput pwmCameraTilt;
             private PwmOutput pwmSteer;
             private PwmOutput pwmSpeed;
+            private PulseInput pulseSpeed; //pulse control coming from the radio
+            private PulseInput pulseSteer; //pulse control coming from the radio
             private DigitalOutput led_;
             private int PanServoTarget = 1500;
             private int TiltServoTarget = 1500;
@@ -288,12 +291,15 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 pwmSpeed = ioio_.openPwmOutput(11,100);
                 pwmCameraPan_ = ioio_.openPwmOutput(12, 100);
                 pwmCameraTilt= ioio_.openPwmOutput(13, 100);
+                pulseSpeed = ioio_.openPulseInput(6, PulseInput.PulseMode.POSITIVE);
+                pulseSteer = ioio_.openPulseInput(7, PulseInput.PulseMode.POSITIVE);
                 enableUi(true);
             }
 
             @Override
             public void loop() throws ConnectionLostException, InterruptedException {
-                setNumber(input_.read());
+                //setNumber(input_.read());
+                setNumber(pulseSpeed.getDuration());
                 //pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
 
 
