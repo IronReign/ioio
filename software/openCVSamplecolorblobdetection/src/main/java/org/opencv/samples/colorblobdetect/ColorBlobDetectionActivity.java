@@ -47,10 +47,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     private ToggleButton toggleButton_;
     static private int screenWidth;
     static private int screenHeight;
-    static private int blobx;
-    static private int bloby;
+    static private int blobx; //current x value of the centroid (center of mass) of the largest tracked blob contour
+    static private int bloby; //current y value of the centroid of the largest tracked blob
     static private double maxContour = 0;
-    static private double minContour = 1000;
+    static private double minContour = 1000; //smallest contour area that we will pay attention to
 
 //    private CameraControl mOpenCvCameraView;
     private boolean              mIsColorSelected = false;
@@ -275,6 +275,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             private PwmOutput pwmSteer;
             private PwmOutput pwmSpeed;
             private DigitalOutput led_;
+            private int PanServoTarget = 1500;
+            private int TiltServoTarget = 1500;
+            private int SteerServoTarget = 1500;
+            private int SpeedTarget = 1500;
 
             @Override
             public void setup() throws ConnectionLostException {
@@ -291,24 +295,34 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             public void loop() throws ConnectionLostException, InterruptedException {
                 setNumber(input_.read());
                 //pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
+
+
                 if (maxContour >= minContour) //follow the largest countour that meets minimum size requirement
                 {
                     double offset;
-                    // convert to % offset from center.  So center = 50% + 0%, mid left = 50% + -25% = 25%
-                    // then convert to servo range of 1000 to 2000 centered on 1500
+                    float error_x;
+                    float error_y;
+                    // convert to relative % offset from center.  So center = 0, mid left = -.25
                     // then scale by the appropriate multiplier for the desired responsiveness
-                    // then clip to legal servo range
+                    // then update the current servo target with the desired change and clip to legal servo range
+
                     // horizontal
-                    offset = -((screenWidth/2)-blobx); //absolute offset from center
-                    offset = offset/screenWidth; //relative offset
-                    pwmSteer.setPulseWidth((int)(offset * 1000) * -3 + 1500);
-                    pwmCameraPan_.setPulseWidth((int)(offset * 1000 * .15) + 1540);  //center for the pan winch servo is currently off a bit - also reduce its reactivity a whole bunch since it is a 3.5 turn winch server
+                    error_x = ((screenWidth/2)-blobx); //absolute error from center
+                    error_x = error_x/screenWidth; //relative error as a percentage of screen dimensions so that the Kp is more likely to be similar across different systems
+                    SteerServoTarget = ServoSafe(SteerServoTarget + (int)(error_x * 100)); //amplify the steering response with a stronger Kp
+                    pwmSteer.setPulseWidth(SteerServoTarget);
+                    PanServoTarget = SafeRange(PanServoTarget + (int)(error_x * -10), 1300, 1700);
+                    pwmCameraPan_.setPulseWidth(PanServoTarget);  //center for the pan winch servo is currently off a bit - also damp its reactivity a whole bunch since it is a 3.5 turn winch servo
+
+                    ///pwmCameraPan_.setPulseWidth((int)(offset * 1000 * .15) + 1540);  //center for the pan winch servo is currently off a bit - also reduce its reactivity a whole bunch since it is a 3.5 turn winch server
+
                     //vertical
-                    offset = -((screenHeight/2)-bloby); //absolute offset from center
-                    offset = offset/screenHeight; //relative offset
+                    error_y = ((screenHeight/2)-bloby); //absolute offset from center
+                    error_y = error_y/screenHeight; //relative error as a percentage of screen dimensions so that the Kp is more likely to be similar across different systems
                     //pwmSteer.setPulseWidth((int) (((((float) blobx * 3 / (float) screenWidth * 1000) + 1000)-1500)*-1)+1500); // steering needs to be inverted around 1500
                     //pwmCameraPan_.setPulseWidth((int) ((float) blobx / (float) screenWidth * 1000 / 6) + 1460); //range reduced for winch servo
-                    pwmCameraTilt.setPulseWidth((int)(offset * 1000 * 1) + 1500);
+                    TiltServoTarget = ServoSafe(TiltServoTarget + (int)(error_y * -40));
+                    pwmCameraTilt.setPulseWidth(TiltServoTarget);
                 }
 
                 led_.write(!toggleButton_.isChecked());
@@ -318,6 +332,18 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             @Override
             public void disconnected() {
                 enableUi(false);
+            }
+            public int ServoSafe(int requestedValue){
+                //clip requested value to safe range for a servo PWM signal
+                requestedValue = (requestedValue < 1000) ? 1000: requestedValue;
+                requestedValue = (requestedValue > 2000) ? 2000: requestedValue;
+                return requestedValue;
+            }
+            public int SafeRange(int requestedValue, int lowestVal, int highestVal){
+                //clip requested value to safe range for a servo PWM signal
+                requestedValue = (requestedValue < lowestVal) ? lowestVal: requestedValue;
+                requestedValue = (requestedValue > highestVal) ? highestVal: requestedValue;
+                return requestedValue;
             }
         }
 
