@@ -2,6 +2,7 @@ package org.opencv.samples.colorblobdetect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -44,6 +45,8 @@ import ioio.lib.util.android.IOIOActivity;
 public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
     private static final String  TAG              = "OCVSample::Activity";
     private TextView textView_;
+    private TextView PanValue_;
+    private TextView SizeError_;
     private SeekBar seekBar_;
     private ToggleButton toggleButton_;
     static private int screenWidth;
@@ -52,6 +55,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     static private int bloby; //current y value of the centroid of the largest tracked blob
     static private double maxContour = 0;
     static private double minContour = 1000; //smallest contour area that we will pay attention to
+    static private double targetContour = -1; //what is the size of the maximum contour just after it is selected by touch? - serves as the target size (distance to maintain from the object)
 
 //    private CameraControl mOpenCvCameraView;
     private boolean              mIsColorSelected = false;
@@ -106,6 +110,8 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         //setContentView(R.layout.main);
 
         textView_ = (TextView) findViewById(R.id.TextView);
+        PanValue_ = (TextView) findViewById(R.id.PanValue);
+        SizeError_ = (TextView) findViewById(R.id.SizeError);
         seekBar_ = (SeekBar) findViewById(R.id.SeekBar);
         toggleButton_ = (ToggleButton) findViewById(R.id.ToggleButton);
 
@@ -199,6 +205,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         Imgproc.resize(mDetector.getSpectrum(), mSpectrum, SPECTRUM_SIZE);
 
         mIsColorSelected = true;
+        targetContour = -1; //reset target contour so we get a fresh target size on each touch event
 
         touchedRegionRgba.release();
         touchedRegionHsv.release();
@@ -234,6 +241,13 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                     bloby=y;
                 }
             }
+
+            if (targetContour == -1 && maxContour > 0 )
+            {
+                targetContour = maxContour; //new target size, thus distance to object
+            }
+
+
 
 
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
@@ -282,6 +296,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             private int TiltServoTarget = 1500;
             private int SteerServoTarget = 1500;
             private int SpeedTarget = 1500;
+            float error_size;
 
             @Override
             public void setup() throws ConnectionLostException {
@@ -291,23 +306,25 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 pwmSpeed = ioio_.openPwmOutput(11,100);
                 pwmCameraPan_ = ioio_.openPwmOutput(12, 100);
                 pwmCameraTilt= ioio_.openPwmOutput(13, 100);
-                pulseSpeed = ioio_.openPulseInput(6, PulseInput.PulseMode.POSITIVE);
-                pulseSteer = ioio_.openPulseInput(7, PulseInput.PulseMode.POSITIVE);
+                pulseSpeed = ioio_.openPulseInput(7, PulseInput.PulseMode.POSITIVE);
+                pulseSteer = ioio_.openPulseInput(6, PulseInput.PulseMode.POSITIVE);
                 enableUi(true);
             }
 
             @Override
             public void loop() throws ConnectionLostException, InterruptedException {
                 //setNumber(input_.read());
-                setNumber(pulseSpeed.getDuration());
+                setNumber(pulseSpeed.getDuration()*1000000, PanServoTarget, error_size);
                 //pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
 
 
-                if (maxContour >= minContour) //follow the largest countour that meets minimum size requirement
+                if (maxContour >= minContour) //follow the largest contour that meets minimum size requirement
                 {
                     double offset;
                     float error_x;
                     float error_y;
+
+
                     // convert to relative % offset from center.  So center = 0, mid left = -.25
                     // then scale by the appropriate multiplier for the desired responsiveness
                     // then update the current servo target with the desired change and clip to legal servo range
@@ -315,10 +332,11 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                     // horizontal
                     error_x = ((screenWidth/2)-blobx); //absolute error from center
                     error_x = error_x/screenWidth; //relative error as a percentage of screen dimensions so that the Kp is more likely to be similar across different systems
-                    SteerServoTarget = ServoSafe(SteerServoTarget + (int)(error_x * 100)); //amplify the steering response with a stronger Kp
-                    pwmSteer.setPulseWidth(SteerServoTarget);
-                    PanServoTarget = SafeRange(PanServoTarget + (int)(error_x * -10), 1300, 1700);
+                    //SteerServoTarget = ServoSafe(SteerServoTarget + (int)(error_x * 100)); //amplify the steering response with a stronger Kp
+                    //pwmSteer.setPulseWidth(SteerServoTarget);
+                    PanServoTarget = SafeRange(PanServoTarget + (int)(error_x * -80), 600, 2400);
                     pwmCameraPan_.setPulseWidth(PanServoTarget);  //center for the pan winch servo is currently off a bit - also damp its reactivity a whole bunch since it is a 3.5 turn winch servo
+
 
                     ///pwmCameraPan_.setPulseWidth((int)(offset * 1000 * .15) + 1540);  //center for the pan winch servo is currently off a bit - also reduce its reactivity a whole bunch since it is a 3.5 turn winch server
 
@@ -327,9 +345,27 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                     error_y = error_y/screenHeight; //relative error as a percentage of screen dimensions so that the Kp is more likely to be similar across different systems
                     //pwmSteer.setPulseWidth((int) (((((float) blobx * 3 / (float) screenWidth * 1000) + 1000)-1500)*-1)+1500); // steering needs to be inverted around 1500
                     //pwmCameraPan_.setPulseWidth((int) ((float) blobx / (float) screenWidth * 1000 / 6) + 1460); //range reduced for winch servo
-                    TiltServoTarget = ServoSafe(TiltServoTarget + (int)(error_y * -40));
+                    TiltServoTarget = ServoSafe(TiltServoTarget + (int)(error_y * -80));
                     pwmCameraTilt.setPulseWidth(TiltServoTarget);
+
+                    if (pulseSpeed.getDuration()*1000000<1000) //we have a speed (deadman) signal from the receiver that allows us to move
+                    {
+                        error_size = (float) Math.sqrt(Math.abs(targetContour - maxContour)); //linearize the apparent size error
+                        if (targetContour > maxContour) //the current maxContour looks small - so we need to proceed forward
+                            {
+                                pwmSpeed.setPulseWidth(1500-(int)(1.5 * error_size));
+                                pwmSteer.setPulseWidth(ServoReverse(PanServoTarget)); // steering servo slaves off of pan servo, but reverse polarity for steering servo when going forward
+                            }
+                        else
+                        {
+                            pwmSpeed.setPulseWidth(1500+error_size); //smaller scaling up because when backing up we don't want it to be too fast and the apparent size increases faster
+                            pwmSteer.setPulseWidth((PanServoTarget)); // steering servo slaves off of pan servo
+                        }
+                    }
+
+                    else {pwmSpeed.setPulseWidth(1500);}  //no valid deadman signal so stop bot
                 }
+                else {pwmSpeed.setPulseWidth(1500);}  //no valid contour so stop bot
 
                 led_.write(!toggleButton_.isChecked());
                 Thread.sleep(10);
@@ -344,6 +380,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 requestedValue = (requestedValue < 1000) ? 1000: requestedValue;
                 requestedValue = (requestedValue > 2000) ? 2000: requestedValue;
                 return requestedValue;
+            }
+            public int ServoReverse(int requestedValue){
+                //flip input value around 1500
+                return (requestedValue-1500) *-1 + 1500;
             }
             public int SafeRange(int requestedValue, int lowestVal, int highestVal){
                 //clip requested value to safe range for a servo PWM signal
@@ -368,12 +408,16 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             });
         }
 
-        private void setNumber(float f) {
-            final String str = String.format("%.2f", f);
+        private void setNumber(float f, float pan, float val3) {
+            final String str = String.format("%.4f", f);
+            final String strpan = String.format("%.4f", pan);
+            final String str3 = String.format("%.4f", val3);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     textView_.setText(str);
+                    PanValue_.setText(strpan);
+                    SizeError_.setText(str3);
                 }
             });
         }
