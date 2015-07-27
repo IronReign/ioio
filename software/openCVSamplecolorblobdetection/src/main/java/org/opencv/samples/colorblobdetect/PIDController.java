@@ -1,7 +1,9 @@
 package org.opencv.samples.colorblobdetect;
 
+import ioio.lib.spi.Log;
+
 /**
- * Created by karim on 6/28/2015.
+ * Created on 6/28/2015.
  */
 //----------------------------------------------------------------------------
 // Copyright (c) FIRST 2008. All Rights Reserved.
@@ -25,8 +27,10 @@ package org.opencv.samples.colorblobdetect;
     // This also isolates the PID constants from the rate at which the calculations are made
     // so we are free to vary the amount of sleep in the calling loop without requiring a change in the
     // constants -- as long as the period is small enough to meet the requirements of the physical system under control
-    // The PID constants should now be scaled to the dynamics of the physical system and not
+    // The PID constants should now be scaled to the real-time dynamics of the physical system and not
     // so much to the frequency of the calculations
+    // a pretty definitive look at timing on android suggests using System.nanoTime:
+    // http://gamasutra.com/view/feature/171774/getting_high_precision_timing_on_.php?print=1
 // ----------------------------------------------------------------------------
 
 
@@ -48,6 +52,8 @@ public class PIDController {
     private double m_setpoint = 0.0;
     private double m_error = 0.0;
     private double m_result = 0.0;
+    private long m_prevTime;
+    private long m_deltaTime;
 
     /**
      * Allocate a PID object with the given constants for P, I, D
@@ -60,7 +66,7 @@ public class PIDController {
         m_P = Kp;
         m_I = Ki;
         m_D = Kd;
-
+        m_prevTime=System.nanoTime();
     }
 
 
@@ -78,7 +84,8 @@ public class PIDController {
             m_error = m_setpoint - m_input;
 
             // !!!!DEBUG!!!
-            System.out.println(m_setpoint);
+            //System.out.println(m_setpoint);
+            Log.d("PID", String.valueOf(m_setpoint));
 
             // If continuous is set to true allow wrap around
             if (m_continuous) {
@@ -164,7 +171,7 @@ public class PIDController {
 
     /**
      *  Set the PID controller to consider the input to be continuous,
-     *  Rather then using the max and min in as constraints, it considers them to
+     *  Rather than using the max and min in as constraints, it considers them to
      *  be the same point and automatically calculates the shortest route to
      *  the setpoint.
      * @param continuous Set to true turns on continuous, false turns off continuous
@@ -175,7 +182,7 @@ public class PIDController {
 
     /**
      *  Set the PID controller to consider the input to be continuous,
-     *  Rather then using the max and min in as constraints, it considers them to
+     *  Rather than using the max and min in as constraints, it considers them to
      *  be the same point and automatically calculates the shortest route to
      *  the setpoint.
      */

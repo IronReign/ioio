@@ -297,6 +297,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             private int SteerServoTarget = 1500;
             private int SpeedTarget = 1500;
             float error_size;
+            float terrainBoost = 1;
 
             @Override
             public void setup() throws ConnectionLostException {
@@ -315,7 +316,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             public void loop() throws ConnectionLostException, InterruptedException {
                 //setNumber(input_.read());
                 setNumber(pulseSpeed.getDuration()*1000000, PanServoTarget, error_size);
-                //pwmCameraTilt.setPulseWidth(500 + seekBar_.getProgress() * 2);
+                terrainBoost = 1 + ((500 - seekBar_.getProgress()) /500);
 
 
                 if (maxContour >= minContour) //follow the largest contour that meets minimum size requirement
@@ -353,12 +354,12 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                         error_size = (float) Math.sqrt(Math.abs(targetContour - maxContour)); //linearize the apparent size error
                         if (targetContour > maxContour) //the current maxContour looks small - so we need to proceed forward
                             {
-                                pwmSpeed.setPulseWidth(1500-(int)(1.5 * error_size));
+                                pwmSpeed.setPulseWidth(1500-(int)(1.5 * terrainBoost * error_size));
                                 pwmSteer.setPulseWidth(ServoReverse(PanServoTarget)); // steering servo slaves off of pan servo, but reverse polarity for steering servo when going forward
                             }
                         else
                         {
-                            pwmSpeed.setPulseWidth(1500+error_size); //smaller scaling up because when backing up we don't want it to be too fast and the apparent size increases faster
+                            pwmSpeed.setPulseWidth(1500+(int)(terrainBoost * error_size)); //smaller scaling up because when backing up we don't want it to be too fast and the apparent size increases faster
                             pwmSteer.setPulseWidth((PanServoTarget)); // steering servo slaves off of pan servo
                         }
                     }
