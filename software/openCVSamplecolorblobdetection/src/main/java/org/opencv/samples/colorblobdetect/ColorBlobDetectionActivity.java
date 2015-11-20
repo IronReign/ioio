@@ -355,12 +355,12 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                         if (targetContour > maxContour) //the current maxContour looks small - so we need to proceed forward
                             {
                                 pwmSpeed.setPulseWidth(1500-(int)(1.5 * terrainBoost * error_size));
-                                pwmSteer.setPulseWidth(ServoReverse(PanServoTarget)); // steering servo slaves off of pan servo, but reverse polarity for steering servo when going forward
+                                pwmSteer.setPulseWidth(ServoGain(ServoReverse(PanServoTarget),5)); // steering servo slaves off of pan servo, but reverse polarity for steering servo when going forward
                             }
                         else
                         {
                             pwmSpeed.setPulseWidth(1500+(int)(terrainBoost * error_size)); //smaller scaling up because when backing up we don't want it to be too fast and the apparent size increases faster
-                            pwmSteer.setPulseWidth((PanServoTarget)); // steering servo slaves off of pan servo
+                            pwmSteer.setPulseWidth((ServoGain(PanServoTarget,5))); // steering servo slaves off of pan servo
                         }
                     }
 
@@ -391,6 +391,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 requestedValue = (requestedValue < lowestVal) ? lowestVal: requestedValue;
                 requestedValue = (requestedValue > highestVal) ? highestVal: requestedValue;
                 return requestedValue;
+            }
+            public int ServoGain(int servoValue, float gain){
+                servoValue=ServoSafe((int)((float)(servoValue-1500) * gain)+1500);
+                return servoValue;
             }
         }
 
