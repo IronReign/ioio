@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "org.opencv.samples.colorblobdetect"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 15
     }
 
@@ -33,4 +33,5 @@ dependencies {
     compile project(':IOIOLibAndroidAccessory')
     compile project(':IOIOLibAndroidBluetooth')
     compile project(':IOIOLibAndroidDevice')
+    compile 'com.google.android.gms:play-services-location:8.3.0'
 }

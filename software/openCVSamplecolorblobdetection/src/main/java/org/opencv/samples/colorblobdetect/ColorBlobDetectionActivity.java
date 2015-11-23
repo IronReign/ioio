@@ -1,5 +1,6 @@
 package org.opencv.samples.colorblobdetect;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.Math;
@@ -32,6 +33,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import android.location.Location;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -42,13 +52,19 @@ import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
+import java.text.DateFormat;
+import java.util.Date;
+
+public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
     private static final String  TAG              = "OCVSample::Activity";
     private TextView textView_;
     private TextView PanValue_;
     private TextView SizeError_;
     private SeekBar seekBar_;
     private ToggleButton toggleButton_;
+    private TextView PIDerr;
+    private TextView PIDSpeed;
+
     static private int screenWidth;
     static private int screenHeight;
     static private int blobx; //current x value of the centroid (center of mass) of the largest tracked blob contour
@@ -56,6 +72,58 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     static private double maxContour = 0;
     static private double minContour = 1000; //smallest contour area that we will pay attention to
     static private double targetContour = -1; //what is the size of the maximum contour just after it is selected by touch? - serves as the target size (distance to maintain from the object)
+
+    /**
+     * Provides the entry point to Google Play services.
+     */
+    protected GoogleApiClient mGoogleApiClient;
+
+    /**
+     * Represents a geographical location.
+     */
+    protected Location mLastLocation;
+
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 2000;
+
+    /**
+     * The fastest rate for active location updates. Exact. Updates will never be more frequent
+     * than this value.
+     */
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    // Keys for storing activity state in the Bundle.
+    protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
+    protected final static String LOCATION_KEY = "location-key";
+    protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
+
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    protected LocationRequest mLocationRequest;
+
+    /**
+     * Represents a geographical location.
+     */
+    protected Location mCurrentLocation;
+
+    /**
+     * Tracks the status of the location updates request. Value changes when the user presses the
+     * Start Updates and Stop Updates buttons.
+     */
+    protected Boolean mRequestingLocationUpdates;
+
+    /**
+     * Time when the location was updated represented as a String.
+     */
+    protected String mLastUpdateTime;
+
+    protected ArrayList<Location> headingTarget;
+    protected ArrayList<Location> proximityStop;
 
 //    private CameraControl mOpenCvCameraView;
     private boolean              mIsColorSelected = false;
@@ -114,9 +182,32 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         SizeError_ = (TextView) findViewById(R.id.SizeError);
         seekBar_ = (SeekBar) findViewById(R.id.SeekBar);
         toggleButton_ = (ToggleButton) findViewById(R.id.ToggleButton);
+        PIDerr = (TextView) findViewById(R.id.e);
+        PIDSpeed = (TextView) findViewById(R.id.s);
+
+        mRequestingLocationUpdates = true;
+        mLastUpdateTime = "";
+
+        // Update values using data stored in the Bundle.
+        updateValuesFromBundle(savedInstanceState);
+
+        buildGoogleApiClient(); //start location services
 
         enableUi(false);
 
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -125,6 +216,10 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
+        if (mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
     }
 
     @Override
@@ -137,6 +232,13 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+        // Within {@code onPause()}, we pause location updates, but leave the
+        // connection to GoogleApiClient intact.  Here, we resume receiving
+        // location updates if the user has requested them.
+
+        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            startLocationUpdates();
         }
     }
 
@@ -260,6 +362,98 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         return mRgba;
     }
 
+    /**
+     * Callback that fires when the location changes.
+     */
+    @Override
+    public void onLocationChanged(Location location) {
+
+        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        Log.i(TAG, "Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude() + ", Accuracy: " + location.getAccuracy() + ", Turn To:" + location.bearingTo(mCurrentLocation) + ", Dist: " + location.distanceTo(mCurrentLocation));
+        mCurrentLocation = location;
+        //updateUI();
+        //Toast.makeText(this, getResources().getString(R.string.location_updated_message),
+        //        Toast.LENGTH_SHORT).show();
+    }
+
+
+    /**
+     * Updates fields based on data stored in the bundle.
+     *
+     * @param savedInstanceState The activity state saved in the Bundle.
+     */
+    private void updateValuesFromBundle(Bundle savedInstanceState) {
+        Log.i(TAG, "Updating values from bundle");
+        if (savedInstanceState != null) {
+            // Update the value of mRequestingLocationUpdates from the Bundle, and make sure that
+            // the Start Updates and Stop Updates buttons are correctly enabled or disabled.
+            if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
+                mRequestingLocationUpdates = savedInstanceState.getBoolean(
+                        REQUESTING_LOCATION_UPDATES_KEY);
+                //setButtonsEnabledState();
+            }
+
+            // Update the value of mCurrentLocation from the Bundle and update the UI to show the
+            // correct latitude and longitude.
+            if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
+                // Since LOCATION_KEY was found in the Bundle, we can be sure that mCurrentLocation
+                // is not null.
+                mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+            }
+
+            // Update the value of mLastUpdateTime from the Bundle and update the UI.
+            if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
+                mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
+            }
+            //updateUI();
+        }
+    }
+    /**
+     * Runs when a GoogleApiClient object successfully connects.
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.i(TAG, "Connected to GoogleApiClient");
+
+        // If the initial location was never previously requested, we use
+        // FusedLocationApi.getLastLocation() to get it. If it was previously requested, we store
+        // its value in the Bundle and check for it in onCreate(). We
+        // do not request it again unless the user specifically requests location updates by pressing
+        // the Start Updates button.
+        //
+        // Because we cache the value of the initial location in the Bundle, it means that if the
+        // user launches the activity,
+        // moves to a new location, and then changes the device orientation, the original location
+        // is displayed as the activity is re-created.
+        if (mCurrentLocation == null) {
+            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+            //updateUI();
+        }
+
+        // If the user presses the Start Updates button before GoogleApiClient connects, we set
+        // mRequestingLocationUpdates to true (see startUpdatesButtonHandler()). Here, we check
+        // the value of mRequestingLocationUpdates and if it is true, we start location updates.
+        if (mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
+    }
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
         Mat pointMatRgba = new Mat();
         Mat pointMatHsv = new Mat(1, 1, CvType.CV_8UC3, hsvColor);
@@ -426,5 +620,97 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 }
             });
         }
+
+    /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        createLocationRequest();
+    }
     //}
+
+    /**
+     * Sets up the location request. Android has two location request settings:
+     * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
+     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
+     * the AndroidManifest.xml.
+     * <p/>
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     * <p/>
+     * These settings are appropriate for mapping applications that show real-time location
+     * updates.
+     */
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    /**
+     * Requests location updates from the FusedLocationApi.
+     */
+    protected void startLocationUpdates() {
+        // The final argument to {@code requestLocationUpdates()} is a LocationListener
+        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    /**
+     * Removes location updates from the FusedLocationApi.
+     */
+    protected void stopLocationUpdates() {
+        // It is a good practice to remove location requests when the activity is in a paused or
+        // stopped state. Doing so helps battery performance and is especially
+        // recommended in applications that request frequent location updates.
+
+        // The final argument to {@code requestLocationUpdates()} is a LocationListener
+        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    protected void loadWaypoints() {
+        /*
+        headingTarget.add(locationBuilder(33.15581988258402, -96.93552490211482)); //h1
+        headingTarget.add(locationBuilder(33.15809532917204, -96.93634372002995));
+        headingTarget.add(locationBuilder(33.15723412378042, -96.93806983589656));
+        headingTarget.add(locationBuilder(33.15842562191988, -96.9377334777235));
+        //headingTarget.add(locationBuilder(33.15764166666666, -96.93692777777778));
+        proximityStop.add(locationBuilder(33.15701859891353, -96.93643813365026)); //p1
+        proximityStop.add(locationBuilder(33.15733, -96.936367));
+        proximityStop.add(locationBuilder(33.15736106242152, -96.93676045559523));
+        proximityStop.add(locationBuilder(33.1575695280246, -96.93695108803759));
+        //proximityStop.add(locationBuilder(33.15764166666666, -96.93692777777778));
+        */
+        //home waypoints
+        proximityStop.add(locationBuilder( 32.869201, -96.840563)); //p1
+        headingTarget.add(locationBuilder( 32.868563, -96.840618)); //h1
+        proximityStop.add(locationBuilder(  32.869442, -96.840550)); //p2
+        headingTarget.add(locationBuilder(  32.870373, -96.840496)); //h1
+
+    }
+    protected Location locationBuilder(double latitude, double longitude){
+        Location l = new Location("BecauseISaidSo" );
+        l.setLatitude(latitude);
+        l.setLongitude(longitude);
+        l.setAccuracy(10.0f);
+    return l;
+    }
 }
