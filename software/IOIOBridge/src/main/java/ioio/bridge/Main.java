@@ -22,7 +22,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws InterruptedException,
 			IOException {
-		System.out.println("IOIO Emulator Bridge, V1.02");
+		System.out.println("IOIO Emulator Bridge, V1.03");
 		if (args.length != 1) {
 			System.err.println("Usage: java -jar bridge.jar <serial_port>");
 			System.err.println("Don't forget to first run:");
@@ -148,6 +148,7 @@ public class Main {
 				port = (SerialPort) commPort;
 				port.enableReceiveThreshold(1);
 				port.enableReceiveTimeout(500);
+				port.setDTR(false);
 				port.setDTR(true);
 				Thread.sleep(100);
 				return port;
