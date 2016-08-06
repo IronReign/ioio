@@ -1,0 +1,32 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.5.0'
+  }
+}
+
+android {
+  buildToolsVersion "23.0.2"
+  compileSdkVersion 10
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name = 'IOIOLibAndroidBluetooth'
+        description = 'IOIO library for Android - Bluetooth extenstion'
+        packaging = 'aar'
+      }
+    }
+  }
+}
+
+dependencies {
+  compile project(":IOIOLibAndroid")
+}

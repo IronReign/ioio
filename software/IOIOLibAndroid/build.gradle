@@ -1,0 +1,32 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.5.0'
+  }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name = 'IOIOLibAndroid'
+        description = 'IOIO library for Android - common code with ADB support'
+        packaging = 'aar'
+      }
+    }
+  }
+}
+
+android {
+  buildToolsVersion "23.0.2"
+  compileSdkVersion 7
+}
+
+dependencies {
+  compile project(":IOIOLibCore")
+}

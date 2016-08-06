@@ -1,0 +1,36 @@
+apply plugin: 'java'
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name = 'IOIOLibPC'
+        description = 'IOIO Library for PC applications'
+      }
+    }
+  }
+}
+
+javadoc {
+  source = fileTree(dir: 'src/main/java')
+  failOnError = false
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+dependencies {
+  compile 'com.sparetimelabs:purejavacomm:1.0.0'
+  compile project(":IOIOLibCore")
+}
