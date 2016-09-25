@@ -56,7 +56,7 @@ def gitFiles(dirs) {
   ('git ls-files -- ' + dirs.join(' ')).execute().text.readLines()
 }
 
-
+/*
 task bundle(type: Zip) {
   baseName = 'App'
   version = project.version
@@ -77,6 +77,10 @@ task bundle(type: Zip) {
   into('doc') {
     from project('IOIOLibCore').tasks.getByName('javadoc')
   }
+
+
 }
+
+*/
 
 

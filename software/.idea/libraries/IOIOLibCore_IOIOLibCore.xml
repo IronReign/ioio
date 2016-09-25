@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="IOIOLibCore.IOIOLibCore">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/IOIOLibCore/build/libs/IOIOLibCore.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
