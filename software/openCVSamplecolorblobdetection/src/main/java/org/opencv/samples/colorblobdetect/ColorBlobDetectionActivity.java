@@ -64,6 +64,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     private ToggleButton toggleButton_;
     private TextView PIDerr;
     private TextView PIDSpeed;
+    private ToggleButton toggleDrive_;
 
     static private int screenWidth;
     static private int screenHeight;
@@ -72,6 +73,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     static private double maxContour = 0;
     static private double minContour = 1000; //smallest contour area that we will pay attention to
     static private double targetContour = -1; //what is the size of the maximum contour just after it is selected by touch? - serves as the target size (distance to maintain from the object)
+    private int startTime = 100; //countdown timer until it's OK to travel - reset each time screen is touched to allow 5 seconds for operator to get out of the way
 
     /**
      * Provides the entry point to Google Play services.
@@ -182,6 +184,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
         SizeError_ = (TextView) findViewById(R.id.SizeError);
         seekBar_ = (SeekBar) findViewById(R.id.SeekBar);
         toggleButton_ = (ToggleButton) findViewById(R.id.ToggleButton);
+        toggleDrive_ = (ToggleButton) findViewById(R.id.enableButton);
         PIDerr = (TextView) findViewById(R.id.e);
         PIDSpeed = (TextView) findViewById(R.id.s);
 
@@ -193,7 +196,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
 
         buildGoogleApiClient(); //start location services
 
-        enableUi(false);
+        enableUi(false); //set back to false to only enable onscreen controls once IOIO connects
 
     }
     @Override
@@ -543,7 +546,8 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                     TiltServoTarget = ServoSafe(TiltServoTarget + (int)(error_y * -80));
                     pwmCameraTilt.setPulseWidth(TiltServoTarget);
 
-                    if (pulseSpeed.getDuration()*1000000<1000) //we have a speed (deadman) signal from the receiver that allows us to move
+                    //if (pulseSpeed.getDuration()*1000000<1000) //we have a speed (deadman) signal from the receiver that allows us to move
+                    if (toggleDrive_.isChecked())
                     {
                         error_size = (float) Math.sqrt(Math.abs(targetContour - maxContour)); //linearize the apparent size error
                         if (targetContour > maxContour) //the current maxContour looks small - so we need to proceed forward
@@ -568,7 +572,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
 
             @Override
             public void disconnected() {
-                enableUi(false);
+                //enableUi(false);
             }
             public int ServoSafe(int requestedValue){
                 //clip requested value to safe range for a servo PWM signal
@@ -603,6 +607,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
                 public void run() {
                     seekBar_.setEnabled(enable);
                     toggleButton_.setEnabled(enable);
+                    toggleDrive_.setEnabled(enable);
                 }
             });
         }
