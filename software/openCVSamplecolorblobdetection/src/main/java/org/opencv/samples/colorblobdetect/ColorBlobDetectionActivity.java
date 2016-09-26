@@ -73,7 +73,7 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
     static private double maxContour = 0;
     static private double minContour = 1000; //smallest contour area that we will pay attention to
     static private double targetContour = -1; //what is the size of the maximum contour just after it is selected by touch? - serves as the target size (distance to maintain from the object)
-    private int startTime = 100; //countdown timer until it's OK to travel - reset each time screen is touched to allow 5 seconds for operator to get out of the way
+    private long startTime = 100; //countdown timer until it's OK to travel - reset each time screen is touched to allow 5 seconds for operator to get out of the way
 
     /**
      * Provides the entry point to Google Play services.
@@ -512,7 +512,8 @@ public class ColorBlobDetectionActivity extends IOIOActivity implements OnTouchL
             @Override
             public void loop() throws ConnectionLostException, InterruptedException {
                 //setNumber(input_.read());
-                setNumber(pulseSpeed.getDuration()*1000000, PanServoTarget, error_size);
+                //setNumber(pulseSpeed.getDuration()*1000000, PanServoTarget, error_size); //if you try to read in a pulse input signal and none is present, the getDuration call will block
+                setNumber(toggleDrive_.isChecked()?1:0, PanServoTarget, error_size);
                 terrainBoost = 1 + ((500 - seekBar_.getProgress()) /500);
 
 
